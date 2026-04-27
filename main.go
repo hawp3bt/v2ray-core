@@ -22,7 +22,8 @@ var (
 	configDir   string
 	version     = flag.Bool("version", false, "Show current version of V2Ray.")
 	testConfig  = flag.Bool("test", false, "Test the configuration and exit without starting.")
-	format      = flag.String("format", "json", "Format of input file, supported formats: json, pb, toml, yaml")
+	// Changed default format to yaml since I prefer yaml configs over json
+	format      = flag.String("format", "yaml", "Format of input file, supported formats: json, pb, toml, yaml")
 )
 
 func fileExists(file string) bool {
@@ -120,8 +121,6 @@ func main() {
 
 	// Handle OS signals for graceful shutdown
 	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
-
+	signal.Notify(osSignals, syscall.SIGTERM, syscall.SIGINT)
 	<-osSignals
-	fmt.Println("V2Ray shutting down.")
 }
