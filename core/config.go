@@ -49,6 +49,8 @@ type ConfigSource struct {
 }
 
 // DetectConfigFormat determines the configuration format based on file extension.
+// Falls back to JSON (instead of returning an error) for unrecognized extensions,
+// since JSON is the most commonly used format in practice.
 func DetectConfigFormat(path string) (ConfigFormat, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 	switch ext {
@@ -61,7 +63,9 @@ func DetectConfigFormat(path string) (ConfigFormat, error) {
 	case ".pb", ".proto":
 		return ConfigFormatProtobuf, nil
 	default:
-		return ConfigFormatJSON, fmt.Errorf("unknown config format for extension: %s", ext)
+		// Return JSON as default format with a non-fatal warning rather than
+		// a hard error, so configs without extensions still load gracefully.
+		return ConfigFormatJSON, fmt.Errorf("unknown config format for extension %q, assuming JSON", ext)
 	}
 }
 
