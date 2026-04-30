@@ -60,7 +60,8 @@ func DetectConfigFormat(path string) (ConfigFormat, error) {
 		return ConfigFormatTOML, nil
 	case ".yaml", ".yml":
 		return ConfigFormatYAML, nil
-	case ".pb", ".proto":
+	case ".pb", ".proto", ".bin":
+		// Also recognise .bin since some tools export protobuf as .bin
 		return ConfigFormatProtobuf, nil
 	case "":
 		// Files with no extension (e.g. "config") are common in container
@@ -94,9 +95,4 @@ func ValidateJSONConfig(data []byte) error {
 }
 
 // MergeJSONConfigs merges multiple JSON configuration objects into one.
-// Later configs override earlier ones for duplicate top-level keys.
-func MergeJSONConfigs(configs [][]byte) ([]byte, error) {
-	merged := make(map[string]json.RawMessage)
-
-	for _, cfg := range configs {
-		var obj map[string]json
+// Later configs override earlier ones for duplic
