@@ -65,6 +65,7 @@ func DetectConfigFormat(path string) (ConfigFormat, error) {
 	default:
 		// Return JSON as default format with a non-fatal warning rather than
 		// a hard error, so configs without extensions still load gracefully.
+		// Note: callers should log this warning but not treat it as fatal.
 		return ConfigFormatJSON, fmt.Errorf("unknown config format for extension %q, assuming JSON", ext)
 	}
 }
@@ -79,7 +80,7 @@ func LoadConfigFile(path string) ([]byte, error) {
 }
 
 // ValidateJSONConfig performs basic structural validation on a JSON config.
-// It checks that the top-level value is a JSON object.
+// It checks that the top-level value is a JSON object (not an array or scalar).
 func ValidateJSONConfig(data []byte) error {
 	var obj map[string]json.RawMessage
 	if err := json.Unmarshal(data, &obj); err != nil {
@@ -96,16 +97,4 @@ func MergeJSONConfigs(configs [][]byte) ([]byte, error) {
 	for _, cfg := range configs {
 		var obj map[string]json.RawMessage
 		if err := json.Unmarshal(cfg, &obj); err != nil {
-			return nil, fmt.Errorf("failed to parse JSON config during merge: %w", err)
-		}
-		for k, v := range obj {
-			merged[k] = v
-		}
-	}
-
-	result, err := json.Marshal(merged)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal merged config: %w", err)
-	}
-	return result, nil
-}
+			return nil, fmt.Errorf("fail
