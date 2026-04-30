@@ -120,7 +120,9 @@ func main() {
 	defer server.Close()
 
 	// Handle OS signals for graceful shutdown
+	// Listening for SIGTERM and SIGINT so Ctrl+C and service stops work cleanly
 	osSignals := make(chan os.Signal, 1)
-	signal.Notify(osSignals, syscall.SIGTERM, syscall.SIGINT)
+	signal.Notify(osSignals, os.Interrupt, syscall.SIGTERM)
 	<-osSignals
+	fmt.Println("V2Ray shutting down.")
 }
