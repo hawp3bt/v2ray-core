@@ -62,6 +62,10 @@ func DetectConfigFormat(path string) (ConfigFormat, error) {
 		return ConfigFormatYAML, nil
 	case ".pb", ".proto":
 		return ConfigFormatProtobuf, nil
+	case "":
+		// Files with no extension (e.g. "config") are common in container
+		// environments, so treat them as JSON silently without a warning.
+		return ConfigFormatJSON, nil
 	default:
 		// Return JSON as default format with a non-fatal warning rather than
 		// a hard error, so configs without extensions still load gracefully.
@@ -95,6 +99,4 @@ func MergeJSONConfigs(configs [][]byte) ([]byte, error) {
 	merged := make(map[string]json.RawMessage)
 
 	for _, cfg := range configs {
-		var obj map[string]json.RawMessage
-		if err := json.Unmarshal(cfg, &obj); err != nil {
-			return nil, fmt.Errorf("fail
+		var obj map[string]json
